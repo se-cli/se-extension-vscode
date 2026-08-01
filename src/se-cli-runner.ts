@@ -24,7 +24,7 @@ export interface SeCliResult {
 }
 
 export interface RunOptions {
-  /** Timeout in milliseconds (default: 120000). */
+  /** Timeout in milliseconds (default: 180000). */
   timeout?: number;
   /** When true, stdin is inherited so interactive prompts can be answered. */
   interactive?: boolean;
@@ -34,7 +34,18 @@ export class SeCliRunner {
   /** Cached availability check so we only probe once per session. */
   private availability: boolean | undefined;
 
-  constructor(private readonly context: vscode.ExtensionContext) {}
+  /** Cached resolved executable (command + baseArgs). */
+  private resolved: { command: string; baseArgs: string[] } | undefined;
+
+  /** Optional output channel for debug logging. */
+  private output: vscode.OutputChannel | undefined;
+
+  constructor(
+    private readonly context: vscode.ExtensionContext,
+    output?: vscode.OutputChannel,
+  ) {
+    this.output = output;
+  }
 
   private getConfig(): vscode.WorkspaceConfiguration {
     return vscode.workspace.getConfiguration('se-cli');
@@ -42,12 +53,20 @@ export class SeCliRunner {
 
   /** Resolve the executable + leading args used to invoke se-cli. */
   private resolveExecutable(): { command: string; baseArgs: string[] } {
+    if (this.resolved) {
+      return this.resolved;
+    }
+
     const cliPath = this.getConfig().get<string>('cliPath', '').trim();
     if (cliPath) {
-      return { command: cliPath, baseArgs: [] };
+      this.resolved = { command: cliPath, baseArgs: [] };
+      return this.resolved;
     }
+
     // npx fallback — works without a global install.
-    return { command: 'npx', baseArgs: ['-y', '@browsers-cli/se-cli'] };
+    // detectCli() will overwrite this if a global binary is found.
+    this.resolved = { command: 'npx', baseArgs: ['-y', '@browsers-cli/se-cli'] };
+    return this.resolved;
   }
 
   /** The workspace folder cwd to run commands in. */
@@ -55,21 +74,64 @@ export class SeCliRunner {
     return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
   }
 
+  /** Log a message to the output channel if available. */
+  private log(message: string): void {
+    if (this.output) {
+      this.output.appendLine(`[runner] ${message}`);
+    }
+  }
+
   /**
-   * Detect whether se-cli can be invoked. Uses the resolved executable
-   * (configured path, global binary, or npx). Cached after the first check.
+   * Detect whether se-cli can be invoked. Tries global binaries first
+   * (se-cli, se, selenium-cli), then falls back to npx.
+   * Cached after the first check.
    */
   async detectCli(): Promise<boolean> {
     if (this.availability !== undefined) {
       return this.availability;
     }
+
+    const cliPath = this.getConfig().get<string>('cliPath', '').trim();
+
+    // If user specified an explicit path, check only that.
+    if (cliPath) {
+      this.log(`Checking explicit cliPath: ${cliPath}`);
+      try {
+        const result = await this.run(['--help'], { timeout: 30_000 });
+        this.availability = result.ok || result.exitCode === 0;
+      } catch {
+        this.availability = false;
+      }
+      this.log(`Explicit cliPath available: ${this.availability}`);
+      return this.availability;
+    }
+
+    // Try globally installed binaries on PATH.
+    for (const cmd of ['se-cli', 'se', 'selenium-cli']) {
+      this.log(`Probing global binary: ${cmd}`);
+      try {
+        const result = await this.runRaw(cmd, ['--help'], 15_000);
+        if (result.ok || result.exitCode === 0) {
+          this.resolved = { command: cmd, baseArgs: [] };
+          this.availability = true;
+          this.log(`Found global binary: ${cmd}`);
+          return true;
+        }
+      } catch {
+        // Try next command
+      }
+    }
+
+    // Fall back to npx.
+    this.log('Falling back to npx @browsers-cli/se-cli');
+    this.resolved = { command: 'npx', baseArgs: ['-y', '@browsers-cli/se-cli'] };
     try {
-      // `--help` exits 0 and is the cheapest successful invocation.
-      const result = await this.run(['--help'], { timeout: 60_000 });
+      const result = await this.run(['--help'], { timeout: 90_000 });
       this.availability = result.ok || result.exitCode === 0;
     } catch {
       this.availability = false;
     }
+    this.log(`npx fallback available: ${this.availability}`);
     return this.availability;
   }
 
@@ -106,12 +168,67 @@ export class SeCliRunner {
     return false;
   }
 
+  /**
+   * Run a command directly with a specific binary (not using resolveExecutable).
+   * Used by detectCli() to probe global binaries.
+   */
+  private runRaw(command: string, args: string[], timeout: number): Promise<SeCliResult> {
+    return new Promise<SeCliResult>((resolve) => {
+      const child = spawn(command, args, {
+        shell: true,
+        cwd: this.getCwd(),
+        env: process.env,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
+      });
+
+      let stdout = '';
+      let stderr = '';
+      let settled = false;
+
+      const finish = (result: SeCliResult): void => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(result);
+      };
+
+      const timer = setTimeout(() => {
+        try {
+          child.kill('SIGKILL');
+        } catch {
+          /* ignore */
+        }
+        finish({ ok: false, stdout, stderr: stderr + '\nTimeout', exitCode: null });
+      }, timeout);
+
+      child.stdout.on('data', (data: Buffer) => {
+        stdout += data.toString();
+      });
+      child.stderr.on('data', (data: Buffer) => {
+        stderr += data.toString();
+      });
+
+      child.on('error', (err: Error) => {
+        finish({ ok: false, stdout, stderr: stderr + err.message, exitCode: null });
+      });
+
+      child.on('close', (code: number | null) => {
+        finish({ ok: code === 0, stdout, stderr, exitCode: code });
+      });
+    });
+  }
+
   /** Run a se-cli command and capture its output. */
   run(args: string[], options?: RunOptions): Promise<SeCliResult> {
     const { command, baseArgs } = this.resolveExecutable();
     const fullArgs = [...baseArgs, ...args];
     const cwd = this.getCwd();
-    const timeout = options?.timeout ?? 120_000;
+    const timeout = options?.timeout ?? 180_000;
+
+    this.log(`$ ${command} ${fullArgs.join(' ')} (timeout: ${timeout}ms)`);
 
     return new Promise<SeCliResult>((resolve) => {
       const child = spawn(command, fullArgs, {
@@ -119,6 +236,7 @@ export class SeCliRunner {
         cwd,
         env: process.env,
         stdio: options?.interactive ? ['inherit', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
       });
 
       let stdout = '';

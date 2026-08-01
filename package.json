@@ -39,6 +39,7 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
+    "onStartupFinished",
     "onCommand:se-cli.openBrowser",
     "onCommand:se-cli.snapshot",
     "onView:se-cli.panel"
@@ -194,7 +195,7 @@
         },
         "se-cli.headless": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Run the browser in headless mode. Disable to show the browser window."
         },
         "se-cli.session": {

@@ -19,9 +19,9 @@ let statusItem: vscode.StatusBarItem;
 let output: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext): void {
-  runner = new SeCliRunner(context);
-  panel = new SeCliWebviewProvider(context);
   output = vscode.window.createOutputChannel('se-cli');
+  runner = new SeCliRunner(context, output);
+  panel = new SeCliWebviewProvider(context);
 
   // Webview panel in the activity bar sidebar.
   context.subscriptions.push(
@@ -74,7 +74,7 @@ function browser(): string {
 }
 
 function headless(): boolean {
-  return config().get<boolean>('headless', true);
+  return config().get<boolean>('headless', false);
 }
 
 function autoSnapshot(): boolean {
