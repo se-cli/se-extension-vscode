@@ -178,6 +178,12 @@ async function openBrowser(): Promise<void> {
     return;
   }
   await config().update('browser', browserChoice.label, vscode.ConfigurationTarget.Workspace);
+
+  // Close any existing session so the daemon restarts with the correct
+  // headed/headless mode. Otherwise startDaemon() reuses the running daemon
+  // and silently ignores --headed.
+  await runner.run(['close', ...runner.sessionFlag()], { timeout: 30_000 }).catch(() => {});
+
   const url = await vscode.window.showInputBox({
     prompt: 'URL to open (optional — leave empty to start a blank session)',
     placeHolder: 'https://example.com',
