@@ -1,0 +1,250 @@
+{
+  "name": "se-extension-vscode",
+  "displayName": "se-cli — Browser Automation",
+  "description": "VS Code extension for se-cli: token-efficient Selenium browser automation with MCP integration, a browser panel, and status bar controls.",
+  "version": "0.1.0",
+  "publisher": "se-cli",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/se-cli/se-extension-vscode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/se-cli/se-extension-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/se-cli/se-extension-vscode/issues"
+  },
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Testing",
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "selenium",
+    "browser-automation",
+    "mcp",
+    "model-context-protocol",
+    "webdriver",
+    "aria",
+    "accessibility",
+    "ai-agent",
+    "se-cli"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:se-cli.openBrowser",
+    "onCommand:se-cli.snapshot",
+    "onView:se-cli.panel"
+  ],
+  "contributes": {
+    "mcpServers": [
+      {
+        "label": "se-cli",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@browsers-cli/se-cli",
+          "mcp-server"
+        ],
+        "scope": "workspace"
+      }
+    ],
+    "commands": [
+      {
+        "command": "se-cli.openBrowser",
+        "title": "Open Browser",
+        "category": "se-cli",
+        "icon": "$(play)"
+      },
+      {
+        "command": "se-cli.closeBrowser",
+        "title": "Close Browser",
+        "category": "se-cli",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "se-cli.navigate",
+        "title": "Navigate to URL",
+        "category": "se-cli",
+        "icon": "$(link)"
+      },
+      {
+        "command": "se-cli.snapshot",
+        "title": "Take Aria Snapshot",
+        "category": "se-cli",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "se-cli.screenshot",
+        "title": "Take Screenshot",
+        "category": "se-cli",
+        "icon": "$(camera)"
+      },
+      {
+        "command": "se-cli.click",
+        "title": "Click Element",
+        "category": "se-cli",
+        "icon": "$(pointer)"
+      },
+      {
+        "command": "se-cli.fill",
+        "title": "Fill Input",
+        "category": "se-cli",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "se-cli.showPanel",
+        "title": "Show Browser Panel",
+        "category": "se-cli",
+        "icon": "$(layout-sidebar-left)"
+      },
+      {
+        "command": "se-cli.runCommand",
+        "title": "Run Command",
+        "category": "se-cli",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "se-cli.checkStatus",
+        "title": "Check Daemon Status",
+        "category": "se-cli",
+        "icon": "$(pulse)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "se-cli.openBrowser"
+        },
+        {
+          "command": "se-cli.closeBrowser"
+        },
+        {
+          "command": "se-cli.navigate"
+        },
+        {
+          "command": "se-cli.snapshot"
+        },
+        {
+          "command": "se-cli.screenshot"
+        },
+        {
+          "command": "se-cli.click"
+        },
+        {
+          "command": "se-cli.fill"
+        },
+        {
+          "command": "se-cli.showPanel"
+        },
+        {
+          "command": "se-cli.runCommand"
+        },
+        {
+          "command": "se-cli.checkStatus"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "se-cli.openBrowser",
+          "when": "view == se-cli.panel",
+          "group": "navigation@1"
+        },
+        {
+          "command": "se-cli.snapshot",
+          "when": "view == se-cli.panel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "se-cli.screenshot",
+          "when": "view == se-cli.panel",
+          "group": "navigation@3"
+        },
+        {
+          "command": "se-cli.runCommand",
+          "when": "view == se-cli.panel",
+          "group": "navigation@4"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "se-cli",
+      "properties": {
+        "se-cli.browser": {
+          "type": "string",
+          "enum": [
+            "chrome",
+            "edge",
+            "firefox"
+          ],
+          "enumDescriptions": [
+            "Google Chrome (default)",
+            "Microsoft Edge",
+            "Mozilla Firefox"
+          ],
+          "default": "chrome",
+          "description": "Browser to launch when starting a se-cli session."
+        },
+        "se-cli.headless": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run the browser in headless mode. Disable to show the browser window."
+        },
+        "se-cli.session": {
+          "type": "string",
+          "default": "default",
+          "description": "Named session for browser isolation. Use different names to run parallel sessions."
+        },
+        "se-cli.autoSnapshot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically take an aria snapshot after navigation and display it in the panel."
+        },
+        "se-cli.cliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the se-cli binary. Leave empty to auto-detect se-cli on PATH, falling back to npx @browsers-cli/se-cli."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "se-cli-sidebar",
+          "title": "se-cli",
+          "icon": "media/se-cli.svg"
+        }
+      ]
+    },
+    "views": {
+      "se-cli-sidebar": [
+        {
+          "id": "se-cli.panel",
+          "name": "Browser",
+          "type": "webview",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "se-cli.panel",
+        "contents": "se-cli browser panel\n[Open Browser](command:se-cli.openBrowser)\n[Run Command](command:se-cli.runCommand)\nTo learn more [read the docs](https://github.com/se-cli/se-extension-vscode)."
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "package": "vsce package",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.103.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.4.0"
+  }
+}
