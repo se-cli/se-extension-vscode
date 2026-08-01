@@ -1,4 +1,4 @@
-name: Publish to VS Code Marketplace
+﻿name: Publish to VS Code Marketplace
 
 on:
   release:
@@ -20,7 +20,7 @@ jobs:
     name: Publish Extension
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Resolve release tag
         id: release
