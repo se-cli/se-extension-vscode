@@ -50,6 +50,9 @@ export class SeCliWebviewProvider implements vscode.WebviewViewProvider {
           case 'openBrowser':
             void vscode.commands.executeCommand('se-cli.openBrowser');
             break;
+          case 'closeBrowser':
+            void vscode.commands.executeCommand('se-cli.closeBrowser');
+            break;
           case 'navigate':
             void vscode.commands.executeCommand('se-cli.navigate');
             break;
@@ -201,6 +204,14 @@ export class SeCliWebviewProvider implements vscode.WebviewViewProvider {
       background-color: var(--vscode-button-background);
       color: var(--vscode-button-foreground);
     }
+    .toolbar button.danger {
+      background-color: var(--vscode-errorForeground, #f14c4c);
+      color: #fff;
+      border-color: var(--vscode-inputValidation-errorBorder, transparent);
+    }
+    .toolbar button.danger:hover {
+      opacity: 0.85;
+    }
     section {
       border-top: 1px solid var(--vscode-panel-border);
       padding-top: 8px;
@@ -308,6 +319,7 @@ export class SeCliWebviewProvider implements vscode.WebviewViewProvider {
 
   <div class="toolbar">
     <button class="primary" id="btn-open">Open Browser</button>
+    <button class="danger" id="btn-close">Close</button>
     <button id="btn-navigate">Navigate</button>
     <button id="btn-snapshot">Snapshot</button>
     <button id="btn-screenshot">Screenshot</button>
@@ -337,6 +349,7 @@ export class SeCliWebviewProvider implements vscode.WebviewViewProvider {
 
     const buttons = {
       'btn-open': 'openBrowser',
+      'btn-close': 'closeBrowser',
       'btn-navigate': 'navigate',
       'btn-snapshot': 'snapshot',
       'btn-screenshot': 'screenshot',

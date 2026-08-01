@@ -2,7 +2,7 @@
     "name":  "se-extension-vscode",
     "displayName":  "se-cli — Browser Automation",
     "description":  "VS Code extension for se-cli: token-efficient Selenium browser automation with MCP integration, a browser panel, and status bar controls.",
-    "version":  "0.1.2",
+    "version":  "0.1.3",
     "publisher":  "se-cli",
     "license":  "Apache-2.0",
     "homepage":  "https://github.com/se-cli/se-extension-vscode",
@@ -159,19 +159,24 @@
                                                              "group":  "navigation@1"
                                                          },
                                                          {
-                                                             "command":  "se-cli.snapshot",
+                                                             "command":  "se-cli.closeBrowser",
                                                              "when":  "view == se-cli.panel",
                                                              "group":  "navigation@2"
                                                          },
                                                          {
-                                                             "command":  "se-cli.screenshot",
+                                                             "command":  "se-cli.snapshot",
                                                              "when":  "view == se-cli.panel",
                                                              "group":  "navigation@3"
                                                          },
                                                          {
-                                                             "command":  "se-cli.runCommand",
+                                                             "command":  "se-cli.screenshot",
                                                              "when":  "view == se-cli.panel",
                                                              "group":  "navigation@4"
+                                                         },
+                                                         {
+                                                             "command":  "se-cli.runCommand",
+                                                             "when":  "view == se-cli.panel",
+                                                             "group":  "navigation@5"
                                                          }
                                                      ]
                                   },
