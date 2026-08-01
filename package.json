@@ -13,6 +13,11 @@
   "bugs": {
     "url": "https://github.com/se-cli/se-extension-vscode/issues"
   },
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#111827",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.103.0"
   },

@@ -1,7 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <rect x="2.5" y="4" width="19" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/>
-  <line x1="2.5" y1="8.5" x2="21.5" y2="8.5" stroke="currentColor" stroke-width="1.6"/>
-  <circle cx="5.4" cy="6.4" r="0.6" fill="currentColor"/>
-  <circle cx="7.7" cy="6.4" r="0.6" fill="currentColor"/>
-  <path d="M8.5 13.3l2.4 2.4L15.5 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Activity bar icon: se-cli + VS Code brackets motif -->
+  <!-- VS Code blue angle bracket left -->
+  <path d="M8 6 L4 12 L8 18" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Terminal prompt > -->
+  <path d="M9 8 L13 12 L9 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Underscore _ -->
+  <line x1="14" y1="16" x2="17" y2="16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- VS Code blue angle bracket right -->
+  <path d="M18 6 L22 12 L18 18" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

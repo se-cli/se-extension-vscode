@@ -47,6 +47,10 @@ commands for common browser actions, and automatic registration of the se-cli
 
 ## Installation
 
+### From the VS Code Marketplace (coming soon)
+
+Search for "se-cli" in the Extensions view (`Ctrl+Shift+X`).
+
 ### From source (development)
 
 ```bash
@@ -164,7 +168,10 @@ se-extension-vscode/
 ├── package.json              # Extension manifest (commands, config, MCP, views)
 ├── tsconfig.json
 ├── media/
+│   ├── icon.png              # Extension marketplace icon (256x256 PNG)
 │   └── se-cli.svg            # Activity bar icon
+├── assets/
+│   └── img/                  # Logo and branding assets (SVG)
 └── src/
     ├── extension.ts          # Entry point: commands, status bar, wiring
     ├── se-cli-runner.ts      # Spawns se-cli / npx, captures output
@@ -186,6 +193,7 @@ VS Code ──(spawns)──> se-cli ──(JSON line over socket)──> daemon
 ## Related
 
 - **se-cli** — https://github.com/se-cli/se-cli
+- **se-mcp** — https://github.com/se-cli/se-mcp
 - **Homepage** — https://se-cli.github.io/se-cli/
 - **npm** — https://www.npmjs.com/package/@browsers-cli/se-cli
 

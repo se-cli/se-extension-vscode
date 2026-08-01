@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-label="se-extension-vscode banner">
+  <!-- Dark themed promotional banner -->
+  <rect width="800" height="360" rx="20" fill="#111827"/>
+
+  <!-- Logo (dark variant) -->
+  <g transform="translate(56, 44)">
+    <rect width="64" height="64" rx="16" fill="#111827" stroke="#6B7280" stroke-width="1.5"/>
+    <path d="M16 22 L10 32 L16 42" fill="none" stroke="#007ACC" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M20 24 L30 32 L20 40" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="32" y1="40" x2="40" y2="40" stroke="#22C55E" stroke-width="4" stroke-linecap="round"/>
+    <path d="M46 22 L52 32 L46 42" fill="none" stroke="#007ACC" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="64" y="44" font-family="Inter, -apple-system, sans-serif" font-size="26" font-weight="700" letter-spacing="-0.5">
+      <tspan fill="#FFFFFF">se-</tspan><tspan fill="#22C55E">extension</tspan><tspan fill="#007ACC">-vscode</tspan>
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="56" y="156" font-family="Inter, -apple-system, sans-serif" font-size="22" fill="#6B7280">Browser Automation for VS Code with MCP Integration</text>
+
+  <!-- Terminal window -->
+  <g transform="translate(56, 186)">
+    <rect width="688" height="132" rx="10" fill="#0a0e16" stroke="#1f2735" stroke-width="1"/>
+    <!-- Title bar dots -->
+    <circle cx="22" cy="22" r="4" fill="#f87171"/>
+    <circle cx="38" cy="22" r="4" fill="#fbbf24"/>
+    <circle cx="54" cy="22" r="4" fill="#22C55E"/>
+    <!-- Command -->
+    <text x="22" y="56" font-family="JetBrains Mono, Menlo, monospace" font-size="15" fill="#22C55E">$ code --install-extension se-cli.se-extension-vscode</text>
+    <!-- Output lines -->
+    <text x="22" y="80" font-family="JetBrains Mono, Menlo, monospace" font-size="13" fill="#6B7280">  ✓ Extension installed successfully</text>
+    <text x="22" y="100" font-family="JetBrains Mono, Menlo, monospace" font-size="13" fill="#6B7280">  ✓ MCP server registered (50+ browser tools)</text>
+    <text x="22" y="120" font-family="JetBrains Mono, Menlo, monospace" font-size="13" fill="#22C55E">  ✓ Ready — Open the se-cli sidebar to start!</text>
+  </g>
+</svg>

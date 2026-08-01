@@ -1,0 +1,154 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+      draft:
+        description: 'Create as draft (recommended — publish manually to trigger VS Code publish)'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME}"
+          fi
+          VERSION="${VERSION#v}"
+          TAG="v${VERSION}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "─── Release Summary ───"
+          echo "  Tag:     $TAG"
+          echo "  Version: $VERSION"
+          echo "  Source:  ${{ github.event_name }}"
+
+      - name: Checkout (tag push)
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout (manual dispatch — from main)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify package version matches release tag
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PKG_VERSION" != "${{ steps.ver.outputs.version }}" ]; then
+            echo "::error::package.json version ($PKG_VERSION) ≠ release version (${{ steps.ver.outputs.version }})"
+            exit 1
+          fi
+          echo "✓ Version verified: $PKG_VERSION"
+
+      - name: Create and push tag (manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag '${{ steps.ver.outputs.tag }}' -m "Release ${{ steps.ver.outputs.tag }}"
+          git push origin '${{ steps.ver.outputs.tag }}'
+
+      - name: Package VSIX
+        id: pack
+        run: |
+          npm version '${{ steps.ver.outputs.version }}' --no-git-tag-version --allow-same-version
+          npx @vscode/vsce package --no-git-tag-version --allow-star-activation
+          VSIX=$(ls *.vsix)
+          echo "vsix=$VSIX" >> $GITHUB_OUTPUT
+          echo "✓ Packaged: $VSIX"
+
+      - name: Create release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then
+            ARGS="$ARGS --prerelease"
+          fi
+          DRAFT="${{ inputs.draft }}"
+          if [ "$DRAFT" != "false" ]; then
+            ARGS="$ARGS --draft"
+          fi
+          gh release create '${{ steps.ver.outputs.tag }}' \
+            --title "${{ steps.ver.outputs.tag }}" \
+            --generate-notes \
+            --target main \
+            '${{ steps.pack.outputs.vsix }}' \
+            $ARGS
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.ver.outputs.tag }}"
+          echo "url=$RELEASE_URL" >> $GITHUB_OUTPUT
+          echo "✓ Release created: $RELEASE_URL"
+
+      - name: Job summary
+        if: always()
+        run: |
+          STATUS="✅ Success"
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="❌ ${{ job.status }}"
+          fi
+          {
+            echo "## Release: ${{ steps.ver.outputs.tag }} — $STATUS"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Tag | \`${{ steps.ver.outputs.tag }}\` |"
+            echo "| Version | \`${{ steps.ver.outputs.version }}\` |"
+            echo "| VSIX | \`${{ steps.pack.outputs.vsix }}\` |"
+            if [ "${{ steps.release.outputs.url }}" != "" ]; then
+              echo "| Release URL | [View on GitHub](${{ steps.release.outputs.url }}) |"
+            fi
+            echo ""
+            echo "### Next Steps"
+            echo ""
+            DRAFT="${{ inputs.draft }}"
+            if [ "$DRAFT" != "false" ]; then
+              echo "1. Review the draft release"
+              echo "2. Click **Publish release** to trigger VS Code Marketplace publish"
+            else
+              echo "1. VS Code publish workflow triggered automatically"
+              echo "2. Check [Actions](https://github.com/${{ github.repository }}/actions) for publish status"
+            fi
+          } >> $GITHUB_STEP_SUMMARY

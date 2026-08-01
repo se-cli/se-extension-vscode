@@ -1,0 +1,102 @@
+name: Publish to VS Code Marketplace
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to publish (e.g. v0.1.0)'
+        required: true
+        type: string
+      dry-run:
+        description: 'Dry run — package only, skip publish'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    name: Publish Extension
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Resolve release tag
+        id: release
+        run: |
+          if [ -n "${{ inputs.release_tag }}" ]; then
+            TAG="${{ inputs.release_tag }}"
+          else
+            TAG="${{ github.event.release.tag_name }}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing se-extension-vscode@$VERSION from release $TAG"
+
+      - name: Verify release exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view '${{ steps.release.outputs.tag }}' --repo '${{ github.repository }}' >/dev/null 2>&1; then
+            echo "::error::Release '${{ steps.release.outputs.tag }}' not found."
+            gh release list --repo '${{ github.repository }}' --limit 20 || true
+            exit 1
+          fi
+          echo "Release verified."
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Set package version
+        run: |
+          npm version '${{ steps.release.outputs.version }}' --no-git-tag-version --allow-same-version
+
+      - name: Verify build output
+        run: |
+          echo "=== Checking build output ==="
+          for f in out/extension.js out/se-cli-runner.js out/webview-provider.js; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Missing build output: $f"
+              exit 1
+            fi
+            echo "  ✓ $f"
+          done
+          echo "=== Package version ==="
+          node -p "'Version: ' + require('./package.json').version"
+
+      - name: Package VSIX
+        run: npx @vscode/vsce package --no-git-tag-version --allow-star-activation
+
+      - name: Dry run — skip publish
+        if: ${{ inputs.dry-run == true }}
+        run: |
+          echo "Dry run complete — VSIX created but not published"
+          ls -la *.vsix
+
+      - name: Publish to VS Code Marketplace
+        if: ${{ inputs.dry-run != true }}
+        run: npx @vscode/vsce publish --no-git-tag-version --pat ${{ secrets.VSCE_TOKEN }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+
+      - name: Upload VSIX to release
+        if: ${{ inputs.dry-run != true }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VSIX_FILE=$(ls *.vsix | head -1)
+          gh release upload '${{ steps.release.outputs.tag }}' "$VSIX_FILE" --repo '${{ github.repository }}' --clobber

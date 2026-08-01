@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="se-extension-vscode icon">
+  <!-- Brand icon: rounded square with >_ terminal symbol + VS Code brackets -->
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="3"/>
+  <!-- VS Code blue angle bracket left < -->
+  <path d="M72 96 L48 128 L72 160" fill="none" stroke="#007ACC" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Prompt caret > -->
+  <path d="M88 102 L128 128 L88 154" fill="none" stroke="#22C55E" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Underscore cursor _ -->
+  <line x1="138" y1="154" x2="172" y2="154" stroke="#22C55E" stroke-width="18" stroke-linecap="round"/>
+  <!-- VS Code blue angle bracket right > -->
+  <path d="M188 96 L212 128 L188 160" fill="none" stroke="#007ACC" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
