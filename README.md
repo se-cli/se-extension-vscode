@@ -96,7 +96,7 @@ Open Settings and search for `se-cli`, or edit `settings.json` directly.
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `se-cli.browser` | `chrome` \| `edge` \| `firefox` | `chrome` | Browser to launch when starting a session. |
+| `se-cli.browser` | `auto` \| `chrome` \| `edge` \| `firefox` | `auto` | Browser to launch when starting a session. `auto` launches the first installed browser (Edge → Chrome → Firefox). |
 | `se-cli.headless` | `boolean` | `true` | Run headless. Disable to show the browser window. |
 | `se-cli.session` | `string` | `default` | Named session for browser isolation / parallel sessions. |
 | `se-cli.autoSnapshot` | `boolean` | `true` | Auto-take an aria snapshot after navigation/interaction. |
@@ -116,7 +116,7 @@ Example `settings.json`:
 
 | Command | Title | Description |
 | --- | --- | --- |
-| `se-cli.openBrowser` | se-cli: Open Browser | Pick a browser and start a daemon session. |
+| `se-cli.openBrowser` | se-cli: Open Browser | Pick a browser (or auto-detect) and start a daemon session. |
 | `se-cli.closeBrowser` | se-cli: Close Browser | Stop the daemon and close the browser. |
 | `se-cli.navigate` | se-cli: Navigate to URL | Run `goto <url>`. |
 | `se-cli.snapshot` | se-cli: Take Aria Snapshot | Run `snapshot` and render the tree in the panel. |
