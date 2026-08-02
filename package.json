@@ -186,17 +186,19 @@
                                                                  "se-cli.browser":  {
                                                                                         "type":  "string",
                                                                                         "enum":  [
+                                                                                                     "auto",
                                                                                                      "chrome",
                                                                                                      "edge",
                                                                                                      "firefox"
                                                                                                  ],
                                                                                         "enumDescriptions":  [
-                                                                                                                 "Google Chrome (default)",
+                                                                                                                 "Auto-detect: launch the first installed browser (Edge → Chrome → Firefox)",
+                                                                                                                 "Google Chrome",
                                                                                                                  "Microsoft Edge",
                                                                                                                  "Mozilla Firefox"
                                                                                                              ],
-                                                                                        "default":  "chrome",
-                                                                                        "description":  "Browser to launch when starting a se-cli session."
+                                                                                        "default":  "auto",
+                                                                                        "description":  "Browser to launch when starting a se-cli session. \"auto\" detects the first installed browser (Edge → Chrome → Firefox)."
                                                                                     },
                                                                  "se-cli.headless":  {
                                                                                          "type":  "boolean",

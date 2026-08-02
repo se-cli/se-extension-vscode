@@ -70,7 +70,7 @@ function config(): vscode.WorkspaceConfiguration {
 }
 
 function browser(): string {
-  return config().get<string>('browser', 'chrome');
+  return config().get<string>('browser', 'auto');
 }
 
 function headless(): boolean {
@@ -91,7 +91,12 @@ function openArgs(url?: string): string[] {
   if (url) {
     args.push(url);
   }
-  args.push(`--browser=${browser()}`);
+  // 'auto' lets the se-cli CLI probe Edge → Chrome → Firefox and launch the
+  // first installed browser. Only pin a browser when explicitly configured.
+  const b = browser();
+  if (b && b !== 'auto') {
+    args.push(`--browser=${b}`);
+  }
   if (!headless()) {
     args.push('--headed');
   }
@@ -168,11 +173,12 @@ async function openBrowser(): Promise<void> {
   }
   const browserChoice = await vscode.window.showQuickPick(
     [
-      { label: 'chrome', description: 'Google Chrome (default)' },
+      { label: 'auto', description: 'Auto-detect (Edge → Chrome → Firefox)' },
+      { label: 'chrome', description: 'Google Chrome' },
       { label: 'edge', description: 'Microsoft Edge' },
       { label: 'firefox', description: 'Mozilla Firefox' },
     ],
-    { placeHolder: 'Select a browser to launch', canPickMany: false },
+    { placeHolder: 'Select a browser to launch (auto-detect is default)', canPickMany: false },
   );
   if (!browserChoice) {
     return;
@@ -190,7 +196,8 @@ async function openBrowser(): Promise<void> {
   });
   const args = openArgs(url === undefined ? undefined : url);
   // `open` may take a while to start the daemon + driver.
-  const result = await exec(args, `open ${browserChoice.label}`, { title: 'Opening browser', timeout: 180_000 });
+  const label = browserChoice.label === 'auto' ? 'auto-detect' : browserChoice.label;
+  const result = await exec(args, `open ${label}`, { title: 'Opening browser', timeout: 180_000 });
   if (result.ok && autoSnapshot() && url) {
     await takeSnapshot();
   }
