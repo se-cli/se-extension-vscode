@@ -194,7 +194,7 @@ VS Code ──(spawns)──> se-cli ──(JSON line over socket)──> daemon
 
 - **se-cli** — https://github.com/se-cli/se-cli
 - **se-mcp** — https://github.com/se-cli/se-mcp
-- **Homepage** — https://se-cli.github.io/se-cli/
+- **Homepage** — https://se-cli.github.io/se-site/
 - **npm** — https://www.npmjs.com/package/@browsers-cli/se-cli
 
 ## License
