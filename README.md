@@ -14,7 +14,7 @@ commands for common browser actions, and automatic registration of the se-cli
 ## Features
 
 - **MCP server integration** — se-cli is registered as a Model Context Protocol
-  server via `contributes.mcpServers`, exposing 40+ browser automation tools
+  server via `contributes.mcpServers`, exposing all 62 browser automation tools
   (navigate, click, fill, snapshot, screenshot, assertions, network mocking, …)
   to VS Code agents.
 - **Browser panel** — a webview in the activity bar showing the last aria
@@ -158,7 +158,7 @@ can also configure it manually in `.vscode/mcp.json`:
 ```
 
 See the [se-cli MCP guide](https://github.com/se-cli/se-cli) for the full list of
-40+ tools (navigation, interaction, assertions, network mocking, storage, tabs,
+62 tools (navigation, interaction, assertions, network mocking, storage, tabs,
 and more).
 
 ## Architecture
