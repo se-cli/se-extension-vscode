@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { SeCliRunner, SeCliResult } from './se-cli-runner';
 import { SeCliWebviewProvider, HistoryEntry } from './webview-provider';
 import { SeCliTaskProvider } from './task-provider';
+import { buildAttachArgs, normalizeCdpUrl, probeCdp } from './attach';
 
 let runner: SeCliRunner;
 let panel: SeCliWebviewProvider;
@@ -59,6 +60,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('se-cli.showPanel', () => panel.show()),
     vscode.commands.registerCommand('se-cli.runCommand', runCommand),
     vscode.commands.registerCommand('se-cli.checkStatus', checkStatus),
+    vscode.commands.registerCommand('se-cli.attachBrowser', attachBrowser),
   );
 
   // Initial status probe.
@@ -215,6 +217,62 @@ async function closeBrowser(): Promise<void> {
     return;
   }
   await exec(['close', ...runner.sessionFlag()], 'close', { title: 'Closing browser' });
+}
+
+/** Default Chrome DevTools Protocol endpoint for an attached browser. */
+const DEFAULT_CDP_URL = 'http://localhost:9222';
+
+/**
+ * Resolve the CDP endpoint to attach to. Probes the default localhost:9222
+ * first; when nothing answers, asks the user for an endpoint and shows how
+ * to start a browser with a debugging port. Returns null to abort.
+ */
+async function resolveCdpUrl(): Promise<string | null> {
+  if (await probeCdp(DEFAULT_CDP_URL)) {
+    return DEFAULT_CDP_URL;
+  }
+  const input = await vscode.window.showInputBox({
+    prompt: 'CDP endpoint of the running browser (e.g. 9222 or http://host:9222)',
+    placeHolder: '9222',
+    ignoreFocusOut: true,
+  });
+  if (input === undefined) {
+    return null; // user cancelled
+  }
+  const url = normalizeCdpUrl(input || DEFAULT_CDP_URL);
+  if (await probeCdp(url)) {
+    return url;
+  }
+  const howTo = 'Show how to open a browser with a debug port';
+  const choice = await vscode.window.showWarningMessage(
+    `No browser responding at ${url}. Start one with --remote-debugging-port=9222 and retry.`,
+    howTo,
+  );
+  if (choice === howTo) {
+    const term = vscode.window.createTerminal('se-cli attach');
+    term.show();
+    term.sendText(
+      'chrome --remote-debugging-port=9222   # then run "se-cli: Attach to Running Browser" again',
+    );
+  }
+  return null;
+}
+
+/**
+ * se-cli: Attach to Running Browser — connect the daemon to an already-open
+ * browser via CDP (`se-cli open --cdp=<url>`), instead of launching a new one.
+ */
+async function attachBrowser(): Promise<void> {
+  if (!(await runner.ensureAvailable())) {
+    return;
+  }
+  const url = await resolveCdpUrl();
+  if (!url) {
+    return;
+  }
+  const session = config().get<string>('session', 'default');
+  const args = buildAttachArgs(url, { browser: browser(), session });
+  await exec(args, `attach ${url}`, { title: `Attaching to ${url}`, timeout: 180_000 });
 }
 
 async function navigate(): Promise<void> {
