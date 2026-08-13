@@ -141,6 +141,12 @@
                 "title": "Check Daemon Status",
                 "category": "se-cli",
                 "icon": "$(pulse)"
+            },
+            {
+                "command": "se-cli.attachBrowser",
+                "title": "Attach to Running Browser",
+                "category": "se-cli",
+                "icon": "$(plug)"
             }
         ],
         "menus": {
@@ -174,6 +180,9 @@
                 },
                 {
                     "command": "se-cli.checkStatus"
+                },
+                {
+                    "command": "se-cli.attachBrowser"
                 }
             ],
             "view/title": [

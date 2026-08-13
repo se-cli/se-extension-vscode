@@ -126,6 +126,24 @@ Example `settings.json`:
 | `se-cli.showPanel` | se-cli: Show Browser Panel | Reveal and focus the sidebar panel. |
 | `se-cli.runCommand` | se-cli: Run Command | Quick pick of all available commands. |
 | `se-cli.checkStatus` | se-cli: Check Daemon Status | Run `list` and show active sessions. |
+| `se-cli.attachBrowser` | se-cli: Attach to Running Browser | Connect the daemon to an already-open browser via CDP. |
+
+## Attach to a running browser
+
+Sometimes you want se-cli to drive the browser you already have open (a logged-in
+session, a dev server page, a real-user tab). Run **se-cli: Attach to Running
+Browser** — the extension probes `http://localhost:9222`, and when nothing
+answers there it asks for the CDP endpoint and shows how to start a browser with
+a debugging port:
+
+```
+chrome --remote-debugging-port=9222   # or: edge --remote-debugging-port=9222
+```
+
+The daemon then connects via `se-cli open --cdp=<url>` (`debuggerAddress`), so
+subsequent commands act on your real browser instead of a fresh headless one.
+The session name and browser settings from the extension configuration are
+honored.
 
 ## MCP server integration
 
