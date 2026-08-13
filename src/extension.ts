@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { SeCliRunner, SeCliResult } from './se-cli-runner';
 import { SeCliWebviewProvider, HistoryEntry } from './webview-provider';
+import { SeCliTaskProvider } from './task-provider';
 
 let runner: SeCliRunner;
 let panel: SeCliWebviewProvider;
@@ -39,6 +40,12 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(statusItem);
 
   context.subscriptions.push(output);
+
+  // Task Provider: expose exported test files (mocha/pytest/junit5) as
+  // runnable VS Code tasks via `Tasks: Run Task`.
+  context.subscriptions.push(
+    vscode.tasks.registerTaskProvider(SeCliTaskProvider.TaskType, new SeCliTaskProvider(workspaceFolder())),
+  );
 
   // ── Commands ────────────────────────────────────────────────────────────
   context.subscriptions.push(

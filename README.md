@@ -161,6 +161,25 @@ See the [se-cli MCP guide](https://github.com/se-cli/se-cli) for the full list o
 62 tools (navigation, interaction, assertions, network mocking, storage, tabs,
 and more).
 
+## Tasks
+
+The extension registers a **Task Provider** (`type: se-cli`) that turns test files
+exported by `se-cli record export` into runnable VS Code tasks. Run them from
+`Tasks: Run Task` (or the terminal's task quick pick), bind them to
+keybindings, or reuse them in `.vscode/tasks.json` — no terminal spelunking.
+
+Discovered automatically per framework:
+
+| Framework | Detected files | Task command |
+|---|---|---|
+| mocha | `*.test.js`, `*.spec.js`, `*.test.cjs`/`*.test.mjs` | `npx mocha <file>` |
+| pytest | `test_*.py`, `*_test.py` | `python -m pytest <file>` |
+| junit5 | `*Test.java` | `mvn test -Dtest=<Class>` |
+
+Directories like `node_modules`, `.git`, `dist`, `out`, `target`, `build`,
+`coverage`, and `.se-cli` are skipped, so build artifacts never pollute the
+task list.
+
 ## Architecture
 
 ```
