@@ -47,9 +47,10 @@ commands for common browser actions, and automatic registration of the se-cli
 
 ## Installation
 
-### From the VS Code Marketplace (coming soon)
+### From the VS Code Marketplace
 
-Search for "se-cli" in the Extensions view (`Ctrl+Shift+X`).
+Search for "se-cli" in the Extensions view (`Ctrl+Shift+X`) and install
+**se-cli — Browser Automation** ([marketplace page](https://marketplace.visualstudio.com/items?itemName=se-cli.se-extension-vscode)).
 
 ### From source (development)
 
