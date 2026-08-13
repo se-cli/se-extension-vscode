@@ -14,16 +14,18 @@ commands for common browser actions, and automatic registration of the se-cli
 ## Features
 
 - **MCP server integration** — se-cli is registered as a Model Context Protocol
-  server via `contributes.mcpServers`, exposing all 62 browser automation tools
-  (navigate, click, fill, snapshot, screenshot, assertions, network mocking, …)
-  to VS Code agents.
+  server via `contributes.mcpServers`, exposing all 67 browser automation tools
+  (navigate, click, fill, snapshot, screenshot, assertions, network mocking,
+  recording & test export, …) to VS Code agents.
 - **Browser panel** — a webview in the activity bar showing the last aria
   snapshot as a tree, the last screenshot, quick action buttons, and a command
   history.
 - **Status bar** — live daemon status (running browser / stopped). Click to open
   a quick pick of all commands.
-- **Commands** — open/close browser, navigate, snapshot, screenshot, click, fill,
-  run command, and check daemon status.
+- **Commands** — open/close browser, attach to a running browser, navigate,
+  snapshot, screenshot, click, fill, run command, and check daemon status.
+- **Tasks** — test files exported by `se-cli record export` (mocha / pytest /
+  junit5) are auto-discovered as runnable VS Code tasks.
 - **Auto-snapshot** — optionally take an aria snapshot after every navigation or
   interaction so the panel always reflects the current page.
 - **Works with or without a global install** — uses a configured `se-cli` binary,
@@ -177,8 +179,8 @@ can also configure it manually in `.vscode/mcp.json`:
 ```
 
 See the [se-cli MCP guide](https://github.com/se-cli/se-cli) for the full list of
-62 tools (navigation, interaction, assertions, network mocking, storage, tabs,
-and more).
+67 tools (navigation, interaction, assertions, network mocking, storage, tabs,
+recording & test export, and more).
 
 ## Tasks
 
